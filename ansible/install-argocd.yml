@@ -1,0 +1,24 @@
+---
+# Installs ArgoCD into the cluster and applies the app-of-apps root Application.
+#
+# Usage: ansible-playbook -i inventory/local ansible/install-argocd.yml
+- name: Install ArgoCD
+  hosts: local
+  tasks:
+    - name: Create argocd namespace
+      kubernetes.core.k8s:
+        name: argocd
+        api_version: v1
+        kind: Namespace
+        state: present
+
+    - name: Install ArgoCD manifests
+      kubernetes.core.k8s:
+        state: present
+        namespace: argocd
+        src: https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+    - name: Apply app-of-apps root Application
+      kubernetes.core.k8s:
+        state: present
+        src: ../gitops/root-app.yaml

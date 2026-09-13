@@ -1,0 +1,20 @@
+---
+# Installs the Linkerd service mesh control plane.
+# Requires the `linkerd` CLI to be installed on the control machine.
+#
+# Usage: ansible-playbook -i inventory/local ansible/install-linkerd.yml
+- name: Install Linkerd
+  hosts: local
+  tasks:
+    - name: Check Linkerd pre-flight
+      ansible.builtin.command: linkerd check --pre
+      register: precheck
+      changed_when: false
+
+    - name: Install Linkerd CRDs
+      ansible.builtin.shell: linkerd install --crds | kubectl apply -f -
+      changed_when: true
+
+    - name: Install Linkerd control plane
+      ansible.builtin.shell: linkerd install | kubectl apply -f -
+      changed_when: true
